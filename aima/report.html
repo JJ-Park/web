@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AiMA C12 분석결과지</title>
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --navy: #1B1F3B; --blue: #4A90D9; --purple: #8B6FC0;
+  --lg: #F5F6FA; --mg: #E0E3EB; --dg: #6B7280; --text: #1F2937;
+  --red: #DC2626; --red-dk: #991B1B; --red-dkr: #7F1D1D;
+  --red-bg: #FEF2F2; --red-bd: #FECACA;
+  --grn: #059669; --grn-dk: #065F46; --grn-dkr: #064E3B;
+  --grn-bg: #F0FDF4; --grn-bd: #BBF7D0;
+  --amb-dk: #92400E; --amb-dkr: #78350F; --amb-bg: #FFFBEB; --amb-bd: #FDE68A;
+}
+body {
+  font-family: 'Noto Sans KR', 'NanumSquare', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 9px;
+  background: #dde1e9;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+/* ── Floating Controls ── */
+.controls {
+  position: fixed; top: 16px; right: 16px; z-index: 1000;
+  display: flex; gap: 8px;
+}
+.btn {
+  padding: 9px 18px; border-radius: 7px; border: none; cursor: pointer;
+  font-size: 13px; font-weight: 700; display: flex; align-items: center;
+  gap: 6px; transition: all .18s; box-shadow: 0 2px 8px rgba(0,0,0,.18);
+}
+.btn-pdf  { background: var(--navy); color: #fff; }
+.btn-pdf:hover  { background: #262c54; transform: translateY(-1px); }
+.btn-back { background: #fff; color: var(--navy); border: 1px solid var(--mg); }
+.btn-back:hover { background: var(--lg); }
+
+/* ── No-data overlay ── */
+#no-data {
+  display: none; position: fixed; inset: 0; background: #fff;
+  z-index: 2000; justify-content: center; align-items: center; flex-direction: column; gap: 16px;
+}
+#no-data h2 { font-size: 22px; color: var(--navy); }
+#no-data p  { font-size: 15px; color: var(--dg); }
+
+/* ── A4 Page ── */
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 24px auto;
+  background: #fff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 24px rgba(0,0,0,.18);
+  overflow: hidden;
+}
+.page-body { flex: 1; padding: 0 18mm 10mm; display: flex; flex-direction: column; justify-content: space-evenly; }
+.grad-bar  { height: 8px; background: linear-gradient(to right, var(--blue), var(--purple)); }
+
+/* ── Page Header ── */
+.ph {
+  padding: 4mm 18mm 2mm;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: .5px solid var(--mg); margin-bottom: 4mm;
+}
+.ph-logo { display: flex; align-items: center; gap: 3mm; }
+.ph-logo img { height: 12mm; width: auto; }
+.ph-title h1 { font-size: 11px; font-weight: 800; color: var(--navy); }
+.ph-title p  { font-size: 6px; color: var(--dg); margin-top: .5mm; }
+.ph-page { font-size: 7px; color: var(--dg); white-space: nowrap; }
+
+/* ── Page Footer ── */
+.pf {
+  border-top: .5px solid var(--mg);
+  padding: 2mm 18mm 4mm;
+  display: flex; justify-content: space-between; align-items: flex-end;
+}
+.pf-left p { font-size: 5.5px; color: var(--dg); line-height: 1.7; }
+.pf-right  { font-size: 5.5px; font-weight: 700; color: var(--dg); white-space: nowrap; }
+
+/* ── Section Title ── */
+.sec { margin-bottom: 0; flex-shrink: 0; }
+.sec-hd { display: flex; align-items: stretch; margin-bottom: 4mm; }
+.sec-bar {
+  width: 3px; flex-shrink: 0; border-radius: 2px; margin-right: 4px;
+  background: linear-gradient(to bottom, var(--blue), var(--purple));
+}
+.sec-hd h2 { font-size: 11px; font-weight: 800; color: var(--navy); }
+.sec-hd p  { font-size: 6.5px; color: var(--dg); margin-top: 1mm; }
+
+/* ── Info Table ── */
+.info-tbl { width: 100%; border-collapse: collapse; }
+.info-tbl tr:nth-child(odd) td { background: var(--lg); }
+.info-tbl td { padding: 1.8mm 3mm; height: 8mm; font-size: 7px; }
+.info-tbl .lbl { font-weight: 700; color: var(--dg); width: 24%; }
+.info-tbl .val { color: var(--text); width: 26%; }
+.info-meta { font-size: 6.5px; color: var(--dg); margin-top: 1.5mm; padding-left: 3mm; }
+
+/* ── Hero ── */
+.hero {
+  border-radius: 4mm; border: 1.5px solid;
+  display: flex; align-items: stretch; gap: 4mm;
+  min-height: 46mm; margin-bottom: 3mm; overflow: hidden;
+}
+.hero-accent { width: 4mm; flex-shrink: 0; border-radius: 2mm 0 0 2mm; }
+.hero-main { flex: 1; padding: 4mm 0 4mm; }
+.hero-main h2 { font-size: 22px; font-weight: 900; margin-bottom: 1.5mm; }
+.hero-main h3 { font-size: 10px; font-weight: 700; margin-bottom: 2.5mm; }
+.hero-main p  { font-size: 8px; line-height: 1.7; }
+.hero-score { min-width: 52mm; flex-shrink: 0; padding: 3mm 4mm 3mm 0; }
+.hero-score .slabel { font-size: 7px; font-weight: 700; margin-bottom: 1mm; }
+.hero-score .sval   { font-size: 24px; font-weight: 900; }
+.hero-score .smax   { font-size: 6.5px; color: var(--dg); margin-left: 1mm; vertical-align: middle; }
+.score-bar-bg { height: 3mm; border-radius: 2mm; margin-top: 2mm; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 2mm; transition: width .4s; }
+.snote { font-size: 6px; color: var(--dg); margin-top: 1.5mm; }
+
+.hero.det   { background: var(--red-bg); border-color: var(--red-bd); }
+.hero.det .hero-accent  { background: var(--red); }
+.hero.det h2 { color: var(--red); }
+.hero.det h3 { color: var(--red-dk); }
+.hero.det p  { color: var(--red-dkr); }
+.hero.det .slabel { color: var(--red-dk); }
+.hero.det .sval   { color: var(--red-dk); }
+.hero.det .score-bar-bg  { background: #FEE2E2; }
+.hero.det .score-bar-fill { background: var(--red); }
+
+.hero.neg   { background: var(--grn-bg); border-color: var(--grn-bd); }
+.hero.neg .hero-accent  { background: var(--grn); }
+.hero.neg h2 { color: var(--grn); }
+.hero.neg h3 { color: var(--grn-dk); }
+.hero.neg p  { color: var(--grn-dkr); }
+.hero.neg .slabel { color: var(--grn-dk); }
+.hero.neg .sval   { color: var(--grn-dk); }
+.hero.neg .score-bar-bg  { background: #D1FAE5; }
+.hero.neg .score-bar-fill { background: var(--grn); }
+
+/* ── CSO ── */
+.cso-row {
+  display: flex; align-items: center; gap: 3mm;
+  height: 12mm; padding: 0 2mm; border-radius: 2mm; margin-bottom: 1.5mm;
+}
+.cso-row.r1 { background: var(--red-bg); border: .5px solid var(--red-bd); }
+.cso-rank {
+  width: 7mm; height: 7mm; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 900; color: #fff; flex-shrink: 0;
+}
+.cso-name { width: 38mm; font-size: 8px; flex-shrink: 0; }
+.cso-row.r1 .cso-name { font-weight: 700; }
+.cso-bar-wrap { flex: 1; height: 5mm; background: #E5E7EB; border-radius: 2.5mm; overflow: hidden; }
+.cso-bar-fill { height: 100%; border-radius: 2.5mm; }
+.cso-pct { width: 12mm; font-size: 8px; font-weight: 800; text-align: right; flex-shrink: 0; }
+.cso-empty { font-size: 7.5px; color: var(--dg); padding: 3mm 5mm; }
+
+/* ── C12 Grid ── */
+.c12-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; }
+.c12-cell {
+  background: var(--lg); border-radius: 2mm;
+  padding: 2mm 2.5mm; display: flex; align-items: center;
+  gap: 2.5mm; height: 14mm;
+}
+.c12-dot { width: 4.5mm; height: 4.5mm; border-radius: 50%; flex-shrink: 0; }
+.c12-kr  { font-size: 7.5px; font-weight: 700; }
+.c12-en  { font-size: 5.5px; color: var(--dg); }
+
+/* ── Sub-section heading ── */
+.sub-hd {
+  font-size: 7.5px; font-weight: 700; color: var(--navy);
+  margin: 3.5mm 0 2mm 3mm; display: flex; align-items: center; gap: 2mm;
+}
+.sub-hd::before { content: '▸'; color: var(--blue); }
+
+/* ── Data Table ── */
+.dtbl { width: 100%; border-collapse: collapse; margin-bottom: 2.5mm; }
+.dtbl thead tr { background: linear-gradient(to right, var(--navy), #2D3258); }
+.dtbl thead th { padding: 2.5mm 2mm; font-size: 6.5px; font-weight: 700; color: #fff; text-align: left; }
+.dtbl tbody tr:nth-child(odd) { background: var(--lg); }
+.dtbl tbody td { padding: 2mm 2mm; font-size: 6.5px; height: 7.5mm; }
+.up, .dn  { color: var(--red); font-weight: 700; }
+.ok, .pass { color: var(--grn); font-weight: 700; }
+.dash { color: var(--dg); }
+
+/* Composite box */
+.comp-box {
+  background: #EFF6FF; border: .8px solid var(--blue); border-radius: 2mm;
+  padding: 2.5mm 5mm; display: flex; align-items: center;
+  justify-content: space-between; margin: 1mm 0 3mm;
+}
+.comp-box .clabel { font-size: 8px; font-weight: 700; color: var(--navy); }
+.comp-box .cval   { font-size: 14px; font-weight: 900; color: var(--red); }
+
+/* ── QC ── */
+.qc-tbl { width: 100%; border-collapse: collapse; }
+.qc-tbl tr:nth-child(odd) { background: var(--lg); }
+.qc-tbl td { padding: 2mm 3mm; font-size: 6.5px; height: 7.5mm; }
+.qc-tbl .qname { color: var(--dg); width: 38%; }
+.qc-tbl .qval  { font-weight: 700; width: 20%; }
+.qc-tbl .qref  { color: var(--dg); width: 28%; }
+
+/* ── Interpretation ── */
+.interp-box {
+  background: var(--lg); border-radius: 3mm;
+  padding: 5mm 6mm; margin-bottom: 4mm;
+}
+.interp-box h4 { font-size: 7.5px; font-weight: 700; color: var(--navy); margin-bottom: 2.5mm; }
+.interp-box p  { font-size: 7px; line-height: 1.9; }
+
+/* ── Recommendation ── */
+.rec-box { border-radius: 3mm; border: 1px solid; padding: 4.5mm 6mm; margin-bottom: 4mm; }
+.rec-box.det { background: var(--amb-bg); border-color: var(--amb-bd); }
+.rec-box.neg { background: var(--grn-bg); border-color: var(--grn-bd); }
+.rec-box h4  { font-size: 8px; font-weight: 700; margin-bottom: 2mm; }
+.rec-box.det h4 { color: var(--amb-dk); }
+.rec-box.neg h4 { color: var(--grn-dk); }
+.rec-box ol  { padding-left: 5mm; }
+.rec-box li  { font-size: 7px; line-height: 2.4; }
+.rec-box.det li { color: var(--amb-dkr); }
+.rec-box.neg li { color: var(--grn-dkr); }
+
+/* ── Limitations ── */
+.lim h4 { font-size: 7px; font-weight: 700; color: var(--navy); margin-bottom: 1.5mm; }
+.lim .lim-desc { font-size: 6.5px; color: var(--dg); margin-bottom: 1.5mm; line-height: 1.6; }
+.lim ul { padding-left: 4mm; }
+.lim li { font-size: 6px; color: var(--dg); line-height: 2.2; list-style: disc; }
+
+/* ── Signatures ── */
+.sig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7mm; margin-top: 5mm; }
+.sig-block p   { font-size: 6px; color: var(--dg); margin-bottom: 1mm; }
+.sig-block h5  { font-size: 7px; font-weight: 700; margin-bottom: 3mm; }
+.sig-line      { border-top: 1px dashed var(--dg); }
+
+/* ── Report Meta ── */
+.rmeta { font-size: 5.5px; color: var(--dg); margin-top: 5mm; line-height: 2.2; }
+
+/* ─────────── PRINT ─────────── */
+@media print {
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  /* 브라우저 기본 머리글/바닥글 제거 */
+  html { margin: 0; padding: 0; }
+  body { background: #fff !important; margin: 0; padding: 0; }
+  .controls, #no-data { display: none !important; }
+  .page {
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: unset !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    page-break-after: always;
+    page-break-inside: avoid;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .page:last-child { page-break-after: auto; }
+  /* 그라디언트·배경 강제 인쇄 */
+  .grad-bar { background: linear-gradient(to right, #4A90D9, #8B6FC0) !important; }
+  .hero.det  { background-color: #FEF2F2 !important; }
+  .hero.neg  { background-color: #F0FDF4 !important; }
+  .hero.det .hero-accent { background-color: #DC2626 !important; }
+  .hero.neg .hero-accent { background-color: #059669 !important; }
+  .dtbl thead tr { background: linear-gradient(to right, #1B1F3B, #2D3258) !important; }
+  .interp-box  { background-color: #F5F6FA !important; }
+  .rec-box.det { background-color: #FFFBEB !important; }
+  .rec-box.neg { background-color: #F0FDF4 !important; }
+  .c12-cell    { background-color: #F5F6FA !important; }
+  .comp-box    { background-color: #EFF6FF !important; }
+  .info-tbl tr:nth-child(odd) td { background-color: #F5F6FA !important; }
+  .qc-tbl tr:nth-child(odd) { background-color: #F5F6FA !important; }
+  .cso-row.r1 { background-color: #FEF2F2 !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Controls -->
+<div class="controls" id="controls">
+  <button class="btn btn-back" onclick="location.href='form.html'">← 새 보고서 작성</button>
+  <button class="btn btn-pdf"  onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
+</div>
+
+<!-- No-data fallback -->
+<div id="no-data" style="display:flex;">
+  <h2>데이터 없음</h2>
+  <p>입력 폼에서 분석값을 먼저 입력해 주세요.</p>
+  <button class="btn btn-pdf" onclick="location.href='form.html'">입력 폼으로 이동</button>
+</div>
+
+<!-- ════════════ PAGE 1 ════════════ -->
+<div class="page" id="page1">
+  <div class="grad-bar"></div>
+  <div class="ph">
+    <div class="ph-logo">
+      <img src="logo_new.png" alt="AiMA">
+      <div class="ph-title">
+        <h1>AiMA C12 분석결과지</h1>
+        <p>cfDNA Fragmentomics 기반 다중암 조기진단</p>
+        <p>Multi-Cancer Early Detection Test Report (12 Cancer Types)</p>
+      </div>
+    </div>
+    <div class="ph-page">Page 1 / 3</div>
+  </div>
+
+  <div class="page-body">
+
+    <!-- §1 환자 정보 -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-bar"></div>
+        <div><h2>환자 정보 및 검사 개요</h2><p>Patient Information &amp; Test Overview</p></div>
+      </div>
+      <table class="info-tbl">
+        <tr>
+          <td class="lbl">환자 ID</td><td class="val" id="pt-id">—</td>
+          <td class="lbl">의뢰기관</td><td class="val" id="pt-inst">—</td>
+        </tr>
+        <tr>
+          <td class="lbl">이름</td><td class="val" id="pt-name">—</td>
+          <td class="lbl">의뢰의</td><td class="val" id="pt-doc">—</td>
+        </tr>
+        <tr>
+          <td class="lbl">생년월일</td><td class="val" id="pt-dob">—</td>
+          <td class="lbl">검체 접수일</td><td class="val" id="pt-col">—</td>
+        </tr>
+        <tr>
+          <td class="lbl">성별</td><td class="val" id="pt-sex">—</td>
+          <td class="lbl">보고서 발행일</td><td class="val" id="pt-rep">—</td>
+        </tr>
+      </table>
+      <p class="info-meta">검체유형: 혈액 (Blood)  |  검사명: AiMA C12 v1.0  |  분석방법: cfDNA Fragmentomics (WGS)</p>
+    </div>
+
+    <!-- §2 결과 요약 -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-bar"></div>
+        <div><h2>검사 결과 요약</h2><p>Test Result Summary</p></div>
+      </div>
+      <div class="hero" id="hero">
+        <div class="hero-accent"></div>
+        <div class="hero-main">
+          <h2 id="hero-h2">—</h2>
+          <h3 id="hero-h3">—</h3>
+          <p id="hero-p1">—</p>
+          <p id="hero-p2">—</p>
+        </div>
+        <div class="hero-score">
+          <div class="slabel">암 신호 스코어</div>
+          <div><span class="sval" id="score-val">—</span><span class="smax">/ 1.00</span></div>
+          <div class="score-bar-bg"><div class="score-bar-fill" id="score-bar" style="width:0%"></div></div>
+          <div class="snote" id="score-note">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- §3 CSO -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-bar"></div>
+        <div><h2>암 신호 기원 분석 — CSO Top 3</h2><p>Cancer Signal Origin (Top 3)</p></div>
+      </div>
+      <div id="cso-wrap"></div>
+    </div>
+
+    <!-- §4 C12 Grid -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-bar"></div>
+        <div><h2>AiMA C12 대상 암종 (12종)</h2><p>Cancer Types Covered</p></div>
+      </div>
+      <div class="c12-grid" id="c12-grid"></div>
+    </div>
+
+  </div><!-- /page-body -->
+
+  <div class="pf">
+    <div class="pf-left">
+      <p>본 검사는 스크리닝 목적이며, 최종 진단은 반드시 담당 전문의와 상담하시기 바랍니다.</p>
+      <p>AiMA Genomics Inc. | 서울특별시 강남구 테헤란로 152 | Tel: 02-1234-5678 | www.aima-genomics.com</p>
+    </div>
+    <div class="pf-right">CONFIDENTIAL</div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE 2 ════════════ -->
+<div class="page" id="page2">
+  <div class="grad-bar"></div>
+  <div class="ph">
+    <div class="ph-logo">
+      <img src="logo_new.png" alt="AiMA">
+      <div class="ph-title">
+        <h1>AiMA C12 분석결과지</h1>
+        <p>cfDNA Fragmentomics 기반 다중암 조기진단</p>
+        <p>Multi-Cancer Early Detection Test Report (12 Cancer Types)</p>
+      </div>
+    </div>
+    <div class="ph-page">Page 2 / 3</div>
+  </div>
+
+  <div class="page-body">
+
+    <!-- §5 Fragmentomics -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-bar"></div>
+        <div><h2>Fragmentomics 상세 분석 결과</h2><p>cfDNA Fragmentation Feature Analysis</p></div>
+      </div>
+      <div id="frag-wrap"></div>
+    </div>
+
+    <!-- §6 QC -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-bar"></div>
+        <div><h2>검체 및 시퀀싱 품질 지표</h2><p>Quality Control Metrics</p></div>
+      </div>
+      <table class="qc-tbl" id="qc-tbl">
+        <thead><tr style="background:linear-gradient(to right,var(--navy),#2D3258)">
+          <th style="padding:1.8mm 3mm;font-size:6.5px;font-weight:700;color:#fff;width:38%">지표</th>
+          <th style="padding:1.8mm 3mm;font-size:6.5px;font-weight:700;color:#fff;width:20%">측정값</th>
+          <th style="padding:1.8mm 3mm;font-size:6.5px;font-weight:700;color:#fff;width:28%">참조 범위</th>
+          <th style="padding:1.8mm 3mm;font-size:6.5px;font-weight:700;color:#fff;width:14%">판정</th>
+        </tr></thead>
+        <tbody id="qc-body"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="pf">
+    <div class="pf-left">
+      <p>본 검사는 스크리닝 목적이며, 최종 진단은 반드시 담당 전문의와 상담하시기 바랍니다.</p>
+      <p>AiMA Genomics Inc. | 서울특별시 강남구 테헤란로 152 | Tel: 02-1234-5678 | www.aima-genomics.com</p>
+    </div>
+    <div class="pf-right">CONFIDENTIAL</div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE 3 ════════════ -->
+<div class="page" id="page3">
+  <div class="grad-bar"></div>
+  <div class="ph">
+    <div class="ph-logo">
+      <img src="logo_new.png" alt="AiMA">
+      <div class="ph-title">
+        <h1>AiMA C12 분석결과지</h1>
+        <p>cfDNA Fragmentomics 기반 다중암 조기진단</p>
+        <p>Multi-Cancer Early Detection Test Report (12 Cancer Types)</p>
+      </div>
+    </div>
+    <div class="ph-page">Page 3 / 3</div>
+  </div>
+
+  <div class="page-body">
+
+    <!-- §7 임상 해석 -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-bar"></div>
+        <div><h2>임상 해석 및 권고사항</h2><p>Clinical Interpretation &amp; Recommendations</p></div>
+      </div>
+      <div class="interp-box">
+        <h4>임상 해석</h4>
+        <p id="interp-text">—</p>
+      </div>
+      <div class="rec-box" id="rec-box">
+        <h4 id="rec-title">권고 사항</h4>
+        <ol id="rec-list"></ol>
+      </div>
+    </div>
+
+    <!-- §8 성능 지표 -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-bar"></div>
+        <div><h2>검사 성능 지표 (검증 연구 기반)</h2><p>Test Performance (Validated)</p></div>
+      </div>
+      <table class="dtbl">
+        <thead><tr>
+          <th style="width:45%">암종 / 병기</th>
+          <th style="width:22%">민감도</th>
+          <th style="width:22%">특이도</th>
+          <th>비고</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>전체 12종 (Stage I–IV)</td><td>67.3%</td><td>99.5%</td><td>다기관 검증</td></tr>
+          <tr><td>Stage I</td><td>39.1%</td><td class="dash">—</td><td>조기 발견 한계</td></tr>
+          <tr><td>Stage II</td><td>69.8%</td><td class="dash">—</td><td></td></tr>
+          <tr><td>Stage III–IV</td><td>91.2%</td><td class="dash">—</td><td></td></tr>
+          <tr><td>CSO 정확도 (Top 1)</td><td>89.7%</td><td class="dash">—</td><td>기원 장기 예측</td></tr>
+          <tr><td>CSO 정확도 (Top 3)</td><td>97.2%</td><td class="dash">—</td><td>기원 장기 예측</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- §9 한계 -->
+    <div class="sec lim">
+      <h4>검사법 설명 및 한계 고지사항</h4>
+      <p class="lim-desc">AiMA C12는 혈액 속 cfDNA의 단편화 패턴(크기 분포, 뉴클레오솜 위치, 말단 서열)을 AI 모델로 분석하여 12종 암을 선별하는 검사입니다.</p>
+      <ul>
+        <li>본 검사는 스크리닝(선별) 목적이며, 확진 검사가 아닙니다.</li>
+        <li>12종 이외의 암종은 탐지 대상에 포함되지 않습니다.</li>
+        <li>암 신호 미감지가 암의 부재를 보장하지 않습니다. 기존 검진을 대체하지 않습니다.</li>
+        <li>임신, 자가면역질환, 장기이식, 최근 수혈 이력이 있는 경우 결과 해석에 주의가 필요합니다.</li>
+        <li>Stage I 암에 대한 민감도는 약 39%이며, 모든 조기 암을 감지하지는 못합니다.</li>
+      </ul>
+    </div>
+
+    <!-- §10 서명 -->
+    <div class="sec" style="border-top:.5px solid var(--mg); padding-top:2mm;">
+      <div class="sig-grid" id="sig-grid">
+        <div class="sig-block">
+          <p>검사 담당자</p><h5 id="sig-analyst">—</h5><div class="sig-line"></div>
+        </div>
+        <div class="sig-block">
+          <p>판독 전문의</p><h5 id="sig-reader">—</h5><div class="sig-line"></div>
+        </div>
+        <div class="sig-block">
+          <p>보고서 승인</p><h5 id="sig-approver">—</h5><div class="sig-line"></div>
+        </div>
+      </div>
+      <div class="rmeta" id="rmeta"></div>
+    </div>
+
+  </div>
+
+  <div class="pf">
+    <div class="pf-left">
+      <p>본 검사는 스크리닝 목적이며, 최종 진단은 반드시 담당 전문의와 상담하시기 바랍니다.</p>
+      <p>AiMA Genomics Inc. | 서울특별시 강남구 테헤란로 152 | Tel: 02-1234-5678 | www.aima-genomics.com</p>
+    </div>
+    <div class="pf-right">CONFIDENTIAL</div>
+  </div>
+</div>
+
+<!-- ════════════ JavaScript ════════════ -->
+<script>
+const C12 = [
+  { kr:'폐',      en:'Lung',         color:'#3B82F6' },
+  { kr:'췌장',    en:'Pancreatic',   color:'#8B5CF6' },
+  { kr:'위',      en:'Gastric',      color:'#F59E0B' },
+  { kr:'전립선',  en:'Prostate',     color:'#06B6D4' },
+  { kr:'유방',    en:'Breast',       color:'#EC4899' },
+  { kr:'담도계',  en:'Biliary',      color:'#10B981' },
+  { kr:'대장',    en:'Colorectal',   color:'#EF4444' },
+  { kr:'신장',    en:'Renal',        color:'#F97316' },
+  { kr:'식도',    en:'Esophageal',   color:'#EAB308' },
+  { kr:'자궁내막',en:'Endometrial',  color:'#14B8A6' },
+  { kr:'난소',    en:'Ovarian',      color:'#A855F7' },
+  { kr:'간',      en:'Liver',        color:'#78716C' },
+];
+
+const QC_REFS = {
+  bloodVol:   { name:'혈장량',             unit:'mL',   ref:'≥ 4.0 mL',    pass: v => v >= 4.0 },
+  cfDNAConc:  { name:'cfDNA 농도',         unit:'ng/mL',ref:'4–50 ng/mL',  pass: v => v >= 4 && v <= 50 },
+  seqDepth:   { name:'시퀀싱 깊이 (WGS)',  unit:'×',    ref:'≥ 3.0×',      pass: v => v >= 3.0 },
+  q30:        { name:'Q30 비율',           unit:'%',    ref:'≥ 85%',       pass: v => v >= 85 },
+  mappingRate:{ name:'매핑률 (Mapping Rate)',unit:'%',  ref:'≥ 95%',       pass: v => v >= 95 },
+  gdnaContam: { name:'gDNA 오염도',        unit:'%',    ref:'< 5%',        pass: v => v < 5 },
+  effReads:   { name:'유효 리드 수',        unit:'M',    ref:'≥ 200M',      pass: v => v >= 200 },
+};
+
+function $(id) { return document.getElementById(id); }
+function set(id, val) { const e = $(id); if(e) e.textContent = val; }
+
+function renderC12Grid(detectedOrgans) {
+  const grid = $('c12-grid');
+  grid.innerHTML = '';
+  C12.forEach(c => {
+    const isHit = detectedOrgans && detectedOrgans.some(o => o.includes(c.kr));
+    const cell = document.createElement('div');
+    cell.className = 'c12-cell';
+    if(isHit) cell.style.cssText = 'border: 1.5px solid #DC2626; background:#FEF2F2;';
+    cell.innerHTML = `
+      <div class="c12-dot" style="background:${c.color}"></div>
+      <div><div class="c12-kr">${c.kr}</div><div class="c12-en">${c.en}</div></div>`;
+    grid.appendChild(cell);
+  });
+}
+
+function renderCSO(cso, detected) {
+  const wrap = $('cso-wrap');
+  if (!detected) {
+    wrap.innerHTML = `
+      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:3mm;padding:4mm 5mm;">
+        <div style="font-size:8.5px;font-weight:800;color:#065F46;margin-bottom:2.5mm;">
+          ✓ 암 신호 미감지 — CSO 분석 해당 없음
+        </div>
+        <p style="font-size:7px;color:#064E3B;line-height:1.85;margin-bottom:3.5mm;">
+          암 신호가 감지되지 않아 기원 장기 분석(CSO)을 수행하지 않습니다.
+          CSO 분석은 암 신호 스코어 ≥ 0.50인 경우에만 최대 3개 기원 장기를 예측하여 보고합니다.
+        </p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2.5mm;">
+          <div style="background:#fff;border-radius:2mm;padding:3mm 3.5mm;border:.8px solid #BBF7D0;">
+            <div style="font-size:7px;font-weight:700;color:#065F46;margin-bottom:1.5mm;">분석 원리</div>
+            <div style="font-size:6.5px;color:#047857;line-height:1.75;">cfDNA 단편화 패턴을 12개 장기 기준 프로파일과 비교하여 기원 장기를 확률로 예측합니다.</div>
+          </div>
+          <div style="background:#fff;border-radius:2mm;padding:3mm 3.5mm;border:.8px solid #BBF7D0;">
+            <div style="font-size:7px;font-weight:700;color:#065F46;margin-bottom:1.5mm;">보고 기준</div>
+            <div style="font-size:6.5px;color:#047857;line-height:1.75;">암 신호 스코어가 임계값(0.50) 미만인 경우 CSO 분석 결과는 임상적 의미가 없어 보고하지 않습니다.</div>
+          </div>
+          <div style="background:#fff;border-radius:2mm;padding:3mm 3.5mm;border:.8px solid #BBF7D0;">
+            <div style="font-size:7px;font-weight:700;color:#065F46;margin-bottom:1.5mm;">CSO 정확도</div>
+            <div style="font-size:6.5px;color:#047857;line-height:1.75;">Top-1 정확도 89.7%, Top-3 정확도 97.2% (검증 연구 기반, n=120,000)</div>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+  const rankColors = ['#DC2626','#F59E0B','#8B5CF6'];
+  wrap.innerHTML = '';
+  cso.slice(0,3).forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = `cso-row${i===0?' r1':''}`;
+    row.innerHTML = `
+      <div class="cso-rank" style="background:${rankColors[i]}">${i+1}</div>
+      <div class="cso-name">${item.organ}</div>
+      <div class="cso-bar-wrap">
+        <div class="cso-bar-fill" style="width:${item.prob}%;background:${rankColors[i]}"></div>
+      </div>
+      <div class="cso-pct" style="color:${rankColors[i]}">${item.prob}%</div>`;
+    wrap.appendChild(row);
+  });
+}
+
+function renderFragDet(frag) {
+  const wrap = $('frag-wrap');
+  const rows1 = [
+    ['중간 단편 길이 (Median)', frag.medianLen+' bp', '160–170 bp', frag.medianLen < 160 ? 'up':'ok', frag.medianLen < 160 ? '▲ 단축':'정상'],
+    ['단편 길이 비율 (Short/Long)', frag.slRatio, '0.15–0.25', frag.slRatio > 0.25 ? 'up':'ok', frag.slRatio > 0.25 ? '▲ 상승':'정상'],
+    ['단편 길이 엔트로피', frag.entropy, '3.20–3.50', frag.entropy > 3.50 ? 'up':'ok', frag.entropy > 3.50 ? '▲ 상승':'정상'],
+    ['167bp 피크 비율', frag.peak167, '0.42–0.55', frag.peak167 < 0.42 ? 'dn':'ok', frag.peak167 < 0.42 ? '▼ 감소':'정상'],
+  ];
+  const rows2 = [
+    ['TSS 커버리지 스코어', frag.tssCov, '0.30–0.50', frag.tssCov > 0.50 ? 'up':'ok', frag.tssCov > 0.50 ? '▲ 상승':'정상'],
+    ['조직 특이적 신호 (Top 1)', frag.tissueSignal, '—', 'dash', '—'],
+    ['프로모터 접근성 지수', frag.promoterIdx, '1.00–1.60', frag.promoterIdx > 1.60 ? 'up':'ok', frag.promoterIdx > 1.60 ? '▲ 상승':'정상'],
+  ];
+  const rows3 = [
+    ['4-mer 모티프 다양성', frag.motifDiv+' / 256', '230–250', frag.motifDiv < 230 ? 'dn':'ok', frag.motifDiv < 230 ? '▼ 감소':'정상'],
+    ['CCCA 모티프 빈도', frag.cccaFreq+'%', '1.5–2.5%', frag.cccaFreq > 2.5 ? 'up':'ok', frag.cccaFreq > 2.5 ? '▲ 상승':'정상'],
+    ['모티프 불균형 스코어 (MDS)', frag.mds, '0.00–0.35', frag.mds > 0.35 ? 'up':'ok', frag.mds > 0.35 ? '▲ 상승':'정상'],
+  ];
+  const rows4 = [
+    ['단편 길이 프로파일', frag.scoreSize, '40%', (frag.scoreSize*0.40).toFixed(3)],
+    ['뉴클레오솜 풋프린트', frag.scoreNuc,  '35%', (frag.scoreNuc*0.35).toFixed(3)],
+    ['말단 서열 모티프', frag.scoreMotif,'25%', (frag.scoreMotif*0.25).toFixed(3)],
+  ];
+  const composite = (frag.scoreSize*0.40 + frag.scoreNuc*0.35 + frag.scoreMotif*0.25).toFixed(3);
+
+  function buildTable(headers, rows) {
+    const ths = headers.map(h=>`<th>${h}</th>`).join('');
+    const trs = rows.map(r => {
+      const cls4 = r[3] ? `class="${r[3]}"` : '';
+      return `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td ${cls4}>${r[4]}</td></tr>`;
+    }).join('');
+    return `<table class="dtbl"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+  }
+
+  wrap.innerHTML = `
+    <p class="sub-hd">단편 길이 프로파일 (Fragment Size Profile)</p>
+    ${buildTable(['지표','측정값','참조 범위','판정'], rows1)}
+    <p class="sub-hd">뉴클레오솜 풋프린트 (Nucleosome Footprint)</p>
+    ${buildTable(['지표','측정값','참조 범위','판정'], rows2)}
+    <p class="sub-hd">말단 서열 모티프 (End Motif Pattern)</p>
+    ${buildTable(['지표','측정값','참조 범위','판정'], rows3)}
+    <p class="sub-hd">종합 피처 스코어 (Composite Feature Score)</p>
+    ${buildTable(['피처 범주','개별 스코어','가중치','기여도'], rows4)}
+    <div class="comp-box">
+      <span class="clabel">종합 암 신호 스코어 (Cancer Score)</span>
+      <span class="cval">${composite}</span>
+    </div>`;
+}
+
+function renderFragNeg(frag, score) {
+  const wrap = $('frag-wrap');
+  const rows = [
+    ['cfDNA 농도',                frag.cfDNAConc+' ng/mL', '4–50 ng/mL', 'ok', '정상'],
+    ['중간 단편 길이 (Median)',    frag.medianLen+' bp',    '160–170 bp', frag.medianLen >= 160 && frag.medianLen <= 170 ? 'ok':'up', frag.medianLen >= 160 && frag.medianLen <= 170 ? '정상':'이상'],
+    ['단편 길이 비율 (Short/Long)',frag.slRatio,            '0.15–0.25',  frag.slRatio >= 0.15 && frag.slRatio <= 0.25 ? 'ok':'up', frag.slRatio >= 0.15 && frag.slRatio <= 0.25 ? '정상':'이상'],
+    ['TSS 커버리지 스코어',        frag.tssCov,             '0.30–0.50',  frag.tssCov >= 0.30 && frag.tssCov <= 0.50 ? 'ok':'up', frag.tssCov >= 0.30 && frag.tssCov <= 0.50 ? '정상':'이상'],
+    ['모티프 불균형 스코어 (MDS)', frag.mds,                '0.00–0.35',  frag.mds <= 0.35 ? 'ok':'up', frag.mds <= 0.35 ? '정상':'이상'],
+    ['종합 암 신호 스코어',        score,                   '< 0.50',     'ok', '정상'],
+  ];
+  const ths = ['지표','측정값','참조 범위','판정'].map(h=>`<th>${h}</th>`).join('');
+  const trs = rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="${r[3]}">${r[4]}</td></tr>`).join('');
+  wrap.innerHTML = `
+    <p style="font-size:7.5px;color:var(--dg);padding:0 0 2.5mm 5mm">
+      암 신호가 감지되지 않아 상세 피처 분석 결과를 별도 표기하지 않습니다. 주요 단편화 지표는 모두 정상 범위 내입니다.</p>
+    <p class="sub-hd">cfDNA 단편화 기본 프로파일</p>
+    <table class="dtbl"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>
+    <p class="sub-hd" style="margin-top:4mm;">Fragmentomics 분석 방법론</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2.5mm;">
+      <div style="background:#EFF6FF;border-radius:3mm;padding:4mm 4.5mm;border:.8px solid #BFDBFE;">
+        <div style="font-size:8px;font-weight:800;color:#1E40AF;margin-bottom:2mm;">① Fragment Size Profile</div>
+        <div style="font-size:6.5px;font-weight:700;color:#1E3A8A;margin-bottom:1.5mm;">단편 길이 분포 분석</div>
+        <div style="font-size:6px;color:#1D4ED8;line-height:1.8;">암세포 유래 cfDNA는 뉴클레오솜 재배치로 인해 정상 세포보다 짧은 단편 길이(< 160bp)를 보입니다. 단편 길이 비율(Short/Long), 길이 엔트로피, 167bp 피크 비율을 복합 분석하여 암 신호를 감지합니다.</div>
+      </div>
+      <div style="background:#F5F3FF;border-radius:3mm;padding:4mm 4.5mm;border:.8px solid #DDD6FE;">
+        <div style="font-size:8px;font-weight:800;color:#5B21B6;margin-bottom:2mm;">② Nucleosome Footprint</div>
+        <div style="font-size:6.5px;font-weight:700;color:#4C1D95;margin-bottom:1.5mm;">뉴클레오솜 위치 신호 분석</div>
+        <div style="font-size:6px;color:#6D28D9;line-height:1.8;">뉴클레오솜이 보호하는 DNA 구간은 뉴클레아제로부터 보존되어 cfDNA 단편 끝점의 위치 분포에 패턴을 남깁니다. 전사 시작점(TSS) 주변 커버리지와 프로모터 접근성 지수가 암세포 특이적 신호를 반영합니다.</div>
+      </div>
+      <div style="background:#FFF7ED;border-radius:3mm;padding:4mm 4.5mm;border:.8px solid #FED7AA;">
+        <div style="font-size:8px;font-weight:800;color:#92400E;margin-bottom:2mm;">③ End Motif Pattern</div>
+        <div style="font-size:6.5px;font-weight:700;color:#78350F;margin-bottom:1.5mm;">말단 서열 모티프 분석</div>
+        <div style="font-size:6px;color:#B45309;line-height:1.8;">cfDNA 단편 양 끝 4-mer 서열 256가지의 빈도 분포를 분석합니다. 암 환자에서는 특정 모티프(CCCA 등)의 비정상적 증가와 전체 모티프 다양성 감소가 관찰되며, 이를 모티프 불균형 스코어(MDS)로 정량화합니다.</div>
+      </div>
+    </div>`;
+}
+
+function renderQC(qc) {
+  const tbody = $('qc-body');
+  const keys = Object.keys(QC_REFS);
+  tbody.innerHTML = keys.map((k, i) => {
+    const ref = QC_REFS[k];
+    const val = qc[k];
+    if (val === undefined || val === '') return '';
+    const ok  = ref.pass(parseFloat(val));
+    const bg  = i % 2 === 0 ? `style="background:var(--lg)"` : '';
+    return `<tr ${bg}>
+      <td class="qname">${ref.name}</td>
+      <td class="qval">${val} ${ref.unit}</td>
+      <td class="qref">참조: ${ref.ref}</td>
+      <td class="${ok?'pass':'up'}">${ok?'PASS':'FAIL'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderInterpRec(detected, cso) {
+  const top1 = cso && cso[0] ? cso[0].organ : '—';
+
+  if (detected) {
+    $('interp-text').textContent =
+      `본 검사에서 ${top1} 기원의 암 신호가 높은 신뢰도로 감지되었습니다. `+
+      `cfDNA 단편화 분석에서 단편 길이 단축, 뉴클레오솜 풋프린트 이상, 말단 서열 모티프 편향이 `+
+      `복합적으로 관찰되어 ${top1} 암 가능성이 시사됩니다. 확진을 위한 추가 검사가 반드시 필요합니다.`;
+    $('rec-box').className = 'rec-box det';
+    $('rec-title').textContent = '권고 검사 사항';
+    const items = [
+      `${top1} 관련 정밀 검사 (우선 권장) — 가능한 빠른 시일 내 시행`,
+      '복부 CT 또는 PET-CT — 정밀 검사 정상 시 추가 영상 검사',
+      '종양 표지자 혈액검사 (CEA, CA 19-9 등)',
+      '종양내과 전문의 상담 — 검사 결과 종합 해석',
+    ];
+    $('rec-list').innerHTML = items.map(i=>`<li>${i}</li>`).join('');
+  } else {
+    $('interp-text').textContent =
+      `본 검사에서 탐지 대상 12종 암에 대한 유의미한 암 신호가 감지되지 않았습니다. `+
+      `cfDNA 단편화 프로파일(단편 길이, 뉴클레오솜 풋프린트, 말단 모티프) 모두 정상 범위 내입니다. `+
+      `단, 음성 결과가 암의 완전한 부재를 보장하지는 않으므로 정기 검진을 지속하시기 바랍니다.`;
+    $('rec-box').className = 'rec-box neg';
+    $('rec-title').textContent = '권고 사항';
+    const items = [
+      '국가 암 검진 프로그램 정기 참여를 권장합니다.',
+      '12개월 후 AiMA C12 재검을 권장합니다.',
+      '이상 증상 발생 시 전문의와 상담하십시오.',
+    ];
+    $('rec-list').innerHTML = items.map(i=>`<li>${i}</li>`).join('');
+  }
+}
+
+function render(d) {
+  // §1 Patient Info
+  set('pt-id',   d.patientId);
+  set('pt-name', d.patientName);
+  set('pt-dob',  `${d.birthDate} (만 ${d.age}세)`);
+  set('pt-sex',  d.gender);
+  set('pt-inst', d.institution);
+  set('pt-doc',  d.doctor);
+  set('pt-col',  d.collectionDate);
+  set('pt-rep',  d.reportDate);
+
+  // §2 Hero
+  const hero = $('hero');
+  const pct  = Math.round(d.score * 100);
+  if (d.detected) {
+    hero.className = 'hero det';
+    set('hero-h2', '암 신호 감지됨');
+    set('hero-h3', 'CANCER SIGNAL DETECTED');
+    set('hero-p1', `추정 기원 장기:  ${d.cso && d.cso[0] ? d.cso[0].organ : '—'}`);
+    set('hero-p2', '추가 확인 검사가 필요합니다. 담당 전문의와 상담하십시오.');
+    set('score-note', `임계값: 0.50 | 신뢰도: 95% CI [${d.ciLow}–${d.ciHigh}]`);
+  } else {
+    hero.className = 'hero neg';
+    set('hero-h2', '암 신호 미감지');
+    set('hero-h3', 'NO CANCER SIGNAL DETECTED');
+    set('hero-p1', '본 검사에서 12종 암에 대한 암 신호가 감지되지 않았습니다.');
+    set('hero-p2', '정기적인 건강검진 및 국가 암 검진을 지속적으로 수행하시기 바랍니다.');
+    set('score-note', `임계값: 0.50 | 측정값: ${d.score}`);
+  }
+  set('score-val', d.score.toFixed(2));
+  $('score-bar').style.width = pct + '%';
+
+  // §3 CSO
+  renderCSO(d.cso, d.detected);
+
+  // §4 C12 Grid
+  const hitOrgans = d.detected && d.cso ? d.cso.map(c => c.organ) : [];
+  renderC12Grid(hitOrgans);
+
+  // §5 Fragmentomics
+  if (d.detected) renderFragDet(d.frag);
+  else             renderFragNeg(d.frag, d.score.toFixed(2));
+
+  // §6 QC
+  renderQC(d.qc);
+
+  // §7 Interpretation & Recommendation
+  renderInterpRec(d.detected, d.cso);
+
+  // §10 Signatures & Meta
+  set('sig-analyst',  d.sigs.analyst);
+  set('sig-reader',   d.sigs.reader);
+  set('sig-approver', d.sigs.approver);
+  const suffix = d.detected ? 'D' : 'N';
+  $('rmeta').innerHTML =
+    `보고서 ID: ${d.reportId || 'RPT-2026-C12-00000-'+suffix}<br>`+
+    `알고리즘: AiMA-C12 Fragmentomics v1.0 | 학습 코호트: n=120,000<br>`+
+    `발행일시: ${d.reportDate} KST | 이 보고서는 발행일로부터 1년간 유효합니다.`;
+}
+
+// ── Init ──
+(function init() {
+  const raw = localStorage.getItem('aima_c12_report');
+  if (!raw) return; // show no-data div (already visible by default)
+  $('no-data').style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'flex');
+  try {
+    render(JSON.parse(raw));
+  } catch(e) {
+    alert('데이터를 불러오는 중 오류가 발생했습니다: ' + e.message);
+  }
+})();
+</script>
+</body>
+</html>
