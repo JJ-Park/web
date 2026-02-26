@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AiMA C12 — 결과지 생성</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --navy: #1B1F3B; --blue: #4A90D9; --purple: #8B6FC0;
+  --lg: #F5F6FA; --mg: #E0E3EB; --dg: #6B7280; --text: #1F2937;
+  --red: #DC2626; --red-bg: #FEF2F2; --red-bd: #FECACA;
+  --grn: #059669; --grn-bg: #F0FDF4; --grn-bd: #BBF7D0;
+  --blu-lt: #EFF6FF; --blu-bd: #BFDBFE;
+}
+body {
+  font-family: 'Noto Sans KR', 'NanumSquare', 'Malgun Gothic', sans-serif;
+  background: #e8eaf0;
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Top Nav ── */
+.topbar {
+  background: linear-gradient(to right, var(--navy), #2D3258);
+  padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-logo { display: flex; align-items: center; gap: 12px; }
+.topbar-logo img { height: 28px; }
+.topbar-logo h1 { font-size: 16px; font-weight: 800; color: #fff; }
+.topbar-logo span { font-size: 11px; color: #a0aec0; margin-left: 4px; }
+.topbar-actions { display: flex; gap: 10px; }
+
+/* ── Preset Buttons ── */
+.preset-bar {
+  background: #fff; border-bottom: 1px solid var(--mg);
+  padding: 12px 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.preset-bar span { font-size: 13px; color: var(--dg); font-weight: 600; }
+.preset-btn {
+  padding: 6px 16px; border-radius: 20px; border: 1.5px solid;
+  cursor: pointer; font-size: 13px; font-weight: 700; transition: all .15s;
+}
+.preset-det { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+.preset-det:hover { background: var(--red); color: #fff; }
+.preset-neg { border-color: var(--grn); color: var(--grn); background: var(--grn-bg); }
+.preset-neg:hover { background: var(--grn); color: #fff; }
+.preset-clr { border-color: var(--mg); color: var(--dg); background: #fff; }
+.preset-clr:hover { background: var(--lg); }
+
+/* ── Layout ── */
+.main { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+
+/* ── Card ── */
+.card {
+  background: #fff; border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  margin-bottom: 20px; overflow: hidden;
+}
+.card-hd {
+  background: linear-gradient(to right, var(--navy), #2D3258);
+  padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+}
+.card-hd .badge {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(255,255,255,.2); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.card-hd h2 { font-size: 14px; font-weight: 800; color: #fff; }
+.card-hd p  { font-size: 11px; color: #a0aec0; margin-top: 1px; }
+.card-body  { padding: 20px; }
+
+/* ── Form Grid ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+.form-grid.g1 { grid-template-columns: 1fr; }
+.form-grid.g3 { grid-template-columns: 1fr 1fr 1fr; }
+.span2 { grid-column: span 2; }
+
+.fld label {
+  display: block; font-size: 12px; font-weight: 700;
+  color: var(--dg); margin-bottom: 5px;
+}
+.fld label .req { color: var(--red); margin-left: 2px; }
+.fld input, .fld select, .fld textarea {
+  width: 100%; padding: 9px 12px; border: 1.5px solid var(--mg);
+  border-radius: 7px; font-size: 13px; color: var(--text);
+  background: #fff; transition: border-color .15s;
+  font-family: inherit;
+}
+.fld input:focus, .fld select:focus {
+  outline: none; border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(74,144,217,.12);
+}
+.fld .hint { font-size: 11px; color: var(--dg); margin-top: 4px; }
+.fld input[type="number"] { -moz-appearance: textfield; }
+.fld input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
+
+/* ── Toggle (Detected / Not Detected) ── */
+.toggle-group { display: flex; gap: 0; border-radius: 8px; overflow: hidden; border: 1.5px solid var(--mg); }
+.toggle-opt { flex: 1; }
+.toggle-opt input { display: none; }
+.toggle-opt label {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px; cursor: pointer; font-size: 13px; font-weight: 700;
+  color: var(--dg); background: #fff; transition: all .18s;
+}
+.toggle-opt input:checked + label.det-lbl { background: var(--red); color: #fff; }
+.toggle-opt input:checked + label.neg-lbl { background: var(--grn); color: #fff; }
+
+/* Score slider */
+.score-wrap { display: flex; align-items: center; gap: 12px; }
+.score-wrap input[type="range"] { flex: 1; accent-color: var(--blue); }
+.score-display {
+  min-width: 52px; padding: 6px 10px; border-radius: 7px;
+  background: var(--blu-lt); border: 1.5px solid var(--blu-bd);
+  font-size: 16px; font-weight: 800; color: var(--navy); text-align: center;
+}
+
+/* ── CSO section ── */
+.cso-block {
+  display: grid; grid-template-columns: 3fr 2fr; gap: 10px 14px;
+  align-items: end; margin-bottom: 10px;
+}
+.cso-block label { font-size: 12px; font-weight: 700; color: var(--dg); display: block; margin-bottom: 5px; }
+.prob-wrap { display: flex; align-items: center; gap: 8px; }
+.prob-wrap input[type="range"] { flex: 1; accent-color: var(--red); }
+.prob-display {
+  min-width: 44px; padding: 5px 8px; border-radius: 6px;
+  background: var(--red-bg); border: 1px solid var(--red-bd);
+  font-size: 13px; font-weight: 800; color: var(--red); text-align: center;
+}
+
+/* Rank badge */
+.rank-hd {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 700; color: var(--dg); margin-bottom: 8px;
+}
+.rank-dot {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 900; color: #fff;
+}
+
+/* ── Divider ── */
+.divider { border: none; border-top: 1.5px solid var(--mg); margin: 16px 0; }
+
+/* ── Conditional sections ── */
+.cond-section { display: none; }
+.cond-section.visible { display: block; }
+
+/* ── Submit ── */
+.submit-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid var(--mg);
+  padding: 14px 32px; display: flex; justify-content: flex-end;
+  gap: 12px; box-shadow: 0 -4px 16px rgba(0,0,0,.08); z-index: 100;
+}
+
+/* ── Buttons ── */
+.btn {
+  padding: 11px 24px; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; display: flex; align-items: center;
+  gap: 8px; transition: all .18s;
+}
+.btn-primary { background: var(--navy); color: #fff; }
+.btn-primary:hover { background: #262c54; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(27,31,59,.35); }
+.btn-outline { background: #fff; color: var(--navy); border: 1.5px solid var(--mg); }
+.btn-outline:hover { background: var(--lg); }
+
+/* ── Validation ── */
+.fld input.invalid, .fld select.invalid { border-color: var(--red); }
+.fld .err-msg { font-size: 11px; color: var(--red); margin-top: 4px; display: none; }
+.fld.has-error .err-msg { display: block; }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid.g3 { grid-template-columns: 1fr 1fr; }
+  .span2 { grid-column: span 1; }
+  .topbar { padding: 0 16px; }
+  .main { padding: 16px 12px 80px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <img src="logo_new.png" alt="AiMA">
+    <div>
+      <h1>AiMA C12 <span>결과지 생성</span></h1>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-outline" style="font-size:13px;padding:7px 14px"
+      onclick="location.href='report.html'">보고서 미리보기 →</button>
+  </div>
+</div>
+
+<!-- Preset bar -->
+<div class="preset-bar">
+  <span>샘플 데이터:</span>
+  <button class="preset-btn preset-det" onclick="loadPreset('det')">🔴 양성 샘플 불러오기</button>
+  <button class="preset-btn preset-neg" onclick="loadPreset('neg')">🟢 음성 샘플 불러오기</button>
+  <button class="preset-btn preset-clr" onclick="resetForm()">✕ 초기화</button>
+</div>
+
+<div class="main">
+<form id="reportForm" novalidate>
+
+<!-- ── §1 환자 정보 ── -->
+<div class="card">
+  <div class="card-hd">
+    <div class="badge">1</div>
+    <div><h2>환자 정보</h2><p>Patient Information</p></div>
+  </div>
+  <div class="card-body">
+    <div class="form-grid">
+      <div class="fld">
+        <label>환자 ID <span class="req">*</span></label>
+        <input type="text" id="patientId" placeholder="예: AiMA-2026-00472">
+      </div>
+      <div class="fld">
+        <label>이름 <span class="req">*</span></label>
+        <input type="text" id="patientName" placeholder="예: 홍 * 동 (Hong **-dong)">
+      </div>
+      <div class="fld">
+        <label>생년월일 <span class="req">*</span></label>
+        <input type="date" id="birthDate">
+        <div class="hint">나이는 자동 계산됩니다.</div>
+      </div>
+      <div class="fld">
+        <label>성별 <span class="req">*</span></label>
+        <select id="gender">
+          <option value="">선택하세요</option>
+          <option value="남성 (Male)">남성 (Male)</option>
+          <option value="여성 (Female)">여성 (Female)</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label>의뢰기관 <span class="req">*</span></label>
+        <input type="text" id="institution" placeholder="예: 서울대학교병원">
+      </div>
+      <div class="fld">
+        <label>의뢰의 <span class="req">*</span></label>
+        <input type="text" id="doctor" placeholder="예: 김영수 (종양내과)">
+      </div>
+      <div class="fld">
+        <label>검체 접수일 <span class="req">*</span></label>
+        <input type="date" id="collectionDate">
+      </div>
+      <div class="fld">
+        <label>보고서 발행일 <span class="req">*</span></label>
+        <input type="date" id="reportDate">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── §2 검사 결과 ── -->
+<div class="card">
+  <div class="card-hd">
+    <div class="badge">2</div>
+    <div><h2>검사 결과</h2><p>Test Result</p></div>
+  </div>
+  <div class="card-body">
+    <div class="fld" style="margin-bottom:16px">
+      <label>암 신호 감지 여부 <span class="req">*</span></label>
+      <div class="toggle-group">
+        <div class="toggle-opt">
+          <input type="radio" name="detected" id="det-yes" value="true" onchange="onDetectedChange()">
+          <label for="det-yes" class="det-lbl">🔴 암 신호 감지됨 (Detected)</label>
+        </div>
+        <div class="toggle-opt">
+          <input type="radio" name="detected" id="det-no" value="false" onchange="onDetectedChange()" checked>
+          <label for="det-no" class="neg-lbl">🟢 암 신호 미감지 (Not Detected)</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid g3">
+      <div class="fld">
+        <label>암 신호 스코어 <span class="req">*</span></label>
+        <div class="score-wrap">
+          <input type="range" id="scoreSlider" min="0" max="1" step="0.01" value="0.08"
+            oninput="$('scoreVal').textContent=parseFloat(this.value).toFixed(2); $('scoreInput').value=this.value">
+          <div class="score-display" id="scoreVal">0.08</div>
+        </div>
+        <input type="hidden" id="scoreInput" value="0.08">
+      </div>
+      <div class="fld">
+        <label>95% CI 하한</label>
+        <input type="number" id="ciLow" min="0" max="1" step="0.01" placeholder="0.00">
+      </div>
+      <div class="fld">
+        <label>95% CI 상한</label>
+        <input type="number" id="ciHigh" min="0" max="1" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── §3 CSO Top 3 (Detected only) ── -->
+<div class="card cond-section" id="cso-section">
+  <div class="card-hd">
+    <div class="badge">3</div>
+    <div><h2>암 신호 기원 분석 — CSO Top 3</h2><p>Cancer Signal Origin</p></div>
+  </div>
+  <div class="card-body">
+    <!-- CSO 1 -->
+    <div class="rank-hd"><div class="rank-dot" style="background:#DC2626">1</div> 1순위</div>
+    <div class="cso-block">
+      <div class="fld">
+        <label>기원 장기</label>
+        <select id="cso1-organ"><option value="">선택</option></select>
+      </div>
+      <div class="fld">
+        <label>예측 확률 (%)</label>
+        <div class="prob-wrap">
+          <input type="range" id="cso1-slider" min="0" max="100" step="1" value="72"
+            oninput="$('cso1-disp').textContent=this.value+'%'; $('cso1-prob').value=this.value">
+          <div class="prob-display" id="cso1-disp">72%</div>
+        </div>
+        <input type="hidden" id="cso1-prob" value="72">
+      </div>
+    </div>
+    <hr class="divider">
+
+    <!-- CSO 2 -->
+    <div class="rank-hd"><div class="rank-dot" style="background:#F59E0B">2</div> 2순위</div>
+    <div class="cso-block">
+      <div class="fld">
+        <label>기원 장기</label>
+        <select id="cso2-organ"><option value="">선택</option></select>
+      </div>
+      <div class="fld">
+        <label>예측 확률 (%)</label>
+        <div class="prob-wrap">
+          <input type="range" id="cso2-slider" min="0" max="100" step="1" value="16"
+            oninput="$('cso2-disp').textContent=this.value+'%'; $('cso2-prob').value=this.value">
+          <div class="prob-display" id="cso2-disp" style="background:#FFFBEB;border-color:#FDE68A;color:#D97706">16%</div>
+        </div>
+        <input type="hidden" id="cso2-prob" value="16">
+      </div>
+    </div>
+    <hr class="divider">
+
+    <!-- CSO 3 -->
+    <div class="rank-hd"><div class="rank-dot" style="background:#8B5CF6">3</div> 3순위</div>
+    <div class="cso-block">
+      <div class="fld">
+        <label>기원 장기</label>
+        <select id="cso3-organ"><option value="">선택</option></select>
+      </div>
+      <div class="fld">
+        <label>예측 확률 (%)</label>
+        <div class="prob-wrap">
+          <input type="range" id="cso3-slider" min="0" max="100" step="1" value="8"
+            oninput="$('cso3-disp').textContent=this.value+'%'; $('cso3-prob').value=this.value">
+          <div class="prob-display" id="cso3-disp" style="background:#F5F3FF;border-color:#DDD6FE;color:#7C3AED">8%</div>
+        </div>
+        <input type="hidden" id="cso3-prob" value="8">
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--dg);margin-top:8px">※ 3개 확률의 합이 100%를 초과하지 않도록 입력해 주세요.</p>
+  </div>
+</div>
+
+<!-- ── §4 Fragmentomics ── -->
+<div class="card">
+  <div class="card-hd">
+    <div class="badge" id="frag-badge">4</div>
+    <div><h2>Fragmentomics 분석값</h2><p>cfDNA Fragmentation Feature Values</p></div>
+  </div>
+  <div class="card-body">
+
+    <!-- Detected: 상세 3파트 -->
+    <div class="cond-section" id="frag-det-section">
+      <p style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:12px">▸ 단편 길이 프로파일 (Fragment Size Profile)</p>
+      <div class="form-grid">
+        <div class="fld"><label>중간 단편 길이 (bp)</label>
+          <input type="number" id="medianLen" step="1" placeholder="예: 152">
+          <div class="hint">참조: 160–170 bp</div></div>
+        <div class="fld"><label>Short/Long 비율</label>
+          <input type="number" id="slRatio" step="0.01" placeholder="예: 0.38">
+          <div class="hint">참조: 0.15–0.25</div></div>
+        <div class="fld"><label>단편 길이 엔트로피</label>
+          <input type="number" id="entropy" step="0.01" placeholder="예: 3.82">
+          <div class="hint">참조: 3.20–3.50</div></div>
+        <div class="fld"><label>167bp 피크 비율</label>
+          <input type="number" id="peak167" step="0.01" placeholder="예: 0.31">
+          <div class="hint">참조: 0.42–0.55</div></div>
+      </div>
+      <hr class="divider">
+
+      <p style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:12px">▸ 뉴클레오솜 풋프린트 (Nucleosome Footprint)</p>
+      <div class="form-grid">
+        <div class="fld"><label>TSS 커버리지 스코어</label>
+          <input type="number" id="tssCov" step="0.01" placeholder="예: 0.72">
+          <div class="hint">참조: 0.30–0.50</div></div>
+        <div class="fld"><label>조직 특이적 신호 (Top 1)</label>
+          <input type="text" id="tissueSignal" placeholder="예: 대장 (Colorectal)"></div>
+        <div class="fld"><label>프로모터 접근성 지수</label>
+          <input type="number" id="promoterIdx" step="0.01" placeholder="예: 2.31">
+          <div class="hint">참조: 1.00–1.60</div></div>
+      </div>
+      <hr class="divider">
+
+      <p style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:12px">▸ 말단 서열 모티프 (End Motif Pattern)</p>
+      <div class="form-grid">
+        <div class="fld"><label>4-mer 모티프 다양성 (/ 256)</label>
+          <input type="number" id="motifDiv" step="1" placeholder="예: 218">
+          <div class="hint">참조: 230–250</div></div>
+        <div class="fld"><label>CCCA 모티프 빈도 (%)</label>
+          <input type="number" id="cccaFreq" step="0.1" placeholder="예: 4.8">
+          <div class="hint">참조: 1.5–2.5%</div></div>
+        <div class="fld"><label>모티프 불균형 스코어 (MDS)</label>
+          <input type="number" id="mds" step="0.01" placeholder="예: 0.68">
+          <div class="hint">참조: 0.00–0.35</div></div>
+      </div>
+      <hr class="divider">
+
+      <p style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:12px">▸ 피처별 개별 스코어 (0.00–1.00)</p>
+      <div class="form-grid g3">
+        <div class="fld"><label>단편 길이 프로파일 스코어</label>
+          <input type="number" id="scoreSize" min="0" max="1" step="0.01" placeholder="예: 0.82">
+          <div class="hint">가중치 40%</div></div>
+        <div class="fld"><label>뉴클레오솜 풋프린트 스코어</label>
+          <input type="number" id="scoreNuc" min="0" max="1" step="0.01" placeholder="예: 0.78">
+          <div class="hint">가중치 35%</div></div>
+        <div class="fld"><label>말단 서열 모티프 스코어</label>
+          <input type="number" id="scoreMotif" min="0" max="1" step="0.01" placeholder="예: 0.91">
+          <div class="hint">가중치 25%</div></div>
+      </div>
+      <div id="composite-preview" style="
+        margin-top:12px;padding:12px 16px;border-radius:8px;
+        background:var(--blu-lt);border:1px solid var(--blu-bd);
+        display:flex;align-items:center;justify-content:space-between;
+        font-size:13px;font-weight:700;color:var(--navy);">
+        <span>종합 암 신호 스코어 (자동 계산)</span>
+        <span id="composite-val" style="font-size:18px;color:var(--red)">—</span>
+      </div>
+    </div>
+
+    <!-- Not Detected: 기본 프로파일 -->
+    <div class="cond-section visible" id="frag-neg-section">
+      <p style="font-size:12px;color:var(--dg);margin-bottom:14px">
+        음성 결과의 경우 기본 단편화 프로파일만 입력합니다.</p>
+      <div class="form-grid">
+        <div class="fld"><label>cfDNA 농도 (ng/mL)</label>
+          <input type="number" id="cfDNAConc_neg" step="0.1" placeholder="예: 7.2">
+          <div class="hint">참조: 4–50 ng/mL</div></div>
+        <div class="fld"><label>중간 단편 길이 (bp)</label>
+          <input type="number" id="medianLen_neg" step="1" placeholder="예: 167">
+          <div class="hint">참조: 160–170 bp</div></div>
+        <div class="fld"><label>Short/Long 비율</label>
+          <input type="number" id="slRatio_neg" step="0.01" placeholder="예: 0.19">
+          <div class="hint">참조: 0.15–0.25</div></div>
+        <div class="fld"><label>TSS 커버리지 스코어</label>
+          <input type="number" id="tssCov_neg" step="0.01" placeholder="예: 0.38">
+          <div class="hint">참조: 0.30–0.50</div></div>
+        <div class="fld"><label>모티프 불균형 스코어 (MDS)</label>
+          <input type="number" id="mds_neg" step="0.01" placeholder="예: 0.12">
+          <div class="hint">참조: 0.00–0.35</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── §5 QC ── -->
+<div class="card">
+  <div class="card-hd">
+    <div class="badge" id="qc-badge">5</div>
+    <div><h2>검체 및 시퀀싱 품질 지표</h2><p>Quality Control Metrics</p></div>
+  </div>
+  <div class="card-body">
+    <div class="form-grid">
+      <div class="fld"><label>혈장량 (mL)</label>
+        <input type="number" id="bloodVol" step="0.1" placeholder="예: 4.2">
+        <div class="hint">참조: ≥ 4.0 mL</div></div>
+      <div class="fld"><label>cfDNA 농도 (ng/mL)</label>
+        <input type="number" id="cfDNAConc" step="0.1" placeholder="예: 8.7">
+        <div class="hint">참조: 4–50 ng/mL</div></div>
+      <div class="fld"><label>시퀀싱 깊이 WGS (×)</label>
+        <input type="number" id="seqDepth" step="0.1" placeholder="예: 5.2">
+        <div class="hint">참조: ≥ 3.0×</div></div>
+      <div class="fld"><label>Q30 비율 (%)</label>
+        <input type="number" id="q30" step="0.1" min="0" max="100" placeholder="예: 96.3">
+        <div class="hint">참조: ≥ 85%</div></div>
+      <div class="fld"><label>매핑률 (%)</label>
+        <input type="number" id="mappingRate" step="0.1" min="0" max="100" placeholder="예: 99.1">
+        <div class="hint">참조: ≥ 95%</div></div>
+      <div class="fld"><label>gDNA 오염도 (%)</label>
+        <input type="number" id="gdnaContam" step="0.01" placeholder="예: 0.1">
+        <div class="hint">참조: &lt; 5%</div></div>
+      <div class="fld"><label>유효 리드 수 (M)</label>
+        <input type="number" id="effReads" step="1" placeholder="예: 420">
+        <div class="hint">참조: ≥ 200M</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── §6 서명 ── -->
+<div class="card">
+  <div class="card-hd">
+    <div class="badge" id="sig-badge">6</div>
+    <div><h2>서명 정보</h2><p>Signatures</p></div>
+  </div>
+  <div class="card-body">
+    <div class="form-grid g3">
+      <div class="fld"><label>검사 담당자</label>
+        <input type="text" id="sigAnalyst" placeholder="예: 김지원 (MT)"></div>
+      <div class="fld"><label>판독 전문의</label>
+        <input type="text" id="sigReader" placeholder="예: 박성훈 (MD, PhD)"></div>
+      <div class="fld"><label>보고서 승인</label>
+        <input type="text" id="sigApprover" placeholder="예: 이정민 (MD)"></div>
+    </div>
+  </div>
+</div>
+
+</form><!-- /reportForm -->
+</div><!-- /main -->
+
+<!-- Submit bar -->
+<div class="submit-bar">
+  <button class="btn btn-outline" type="button" onclick="resetForm()">초기화</button>
+  <button class="btn btn-primary" type="button" onclick="submitForm()">
+    보고서 생성 →
+  </button>
+</div>
+
+<script>
+/* ── Shorthand ── */
+function $(id) { return document.getElementById(id); }
+function val(id) { return ($(id) ? $(id).value.trim() : ''); }
+function numVal(id) { return parseFloat(val(id)) || 0; }
+
+/* ── C12 Cancer list ── */
+const C12_OPTIONS = [
+  '폐 (Lung)','췌장 (Pancreatic)','위 (Gastric)','전립선 (Prostate)',
+  '유방 (Breast)','담도계 (Biliary)','대장 (Colorectal)','신장 (Renal)',
+  '식도 (Esophageal)','자궁내막 (Endometrial)','난소 (Ovarian)','간 (Liver)',
+];
+
+/* Populate CSO dropdowns */
+['cso1-organ','cso2-organ','cso3-organ'].forEach(id => {
+  const sel = $(id);
+  C12_OPTIONS.forEach(opt => {
+    const o = document.createElement('option');
+    o.value = o.textContent = opt;
+    sel.appendChild(o);
+  });
+});
+$('cso1-organ').value = '대장 (Colorectal)';
+$('cso2-organ').value = '위 (Gastric)';
+$('cso3-organ').value = '췌장 (Pancreatic)';
+
+/* Default dates */
+const today = new Date().toISOString().slice(0,10);
+$('reportDate').value = today;
+
+/* ── Detected / Not Detected toggle ── */
+function onDetectedChange() {
+  const det = $('det-yes').checked;
+  $('cso-section').classList.toggle('visible', det);
+  $('frag-det-section').classList.toggle('visible', det);
+  $('frag-neg-section').classList.toggle('visible', !det);
+  // re-number badges
+  $('frag-badge').textContent = det ? '4' : '4';
+  $('qc-badge').textContent   = det ? '5' : '5';
+  $('sig-badge').textContent  = det ? '6' : '6';
+}
+
+/* ── Composite score live preview ── */
+function updateComposite() {
+  const s = numVal('scoreSize'), n = numVal('scoreNuc'), m = numVal('scoreMotif');
+  if (s && n && m) {
+    const c = (s*0.40 + n*0.35 + m*0.25).toFixed(3);
+    $('composite-val').textContent = c;
+  }
+}
+['scoreSize','scoreNuc','scoreMotif'].forEach(id =>
+  $(id) && $(id).addEventListener('input', updateComposite)
+);
+
+/* ── Age auto-calc ── */
+$('birthDate').addEventListener('change', function() {
+  // stored in data, no DOM display needed
+});
+
+/* ── Presets ── */
+const PRESETS = {
+  det: {
+    patientId: 'AiMA-2026-00472', patientName: '홍 * 동 (Hong **-dong)',
+    birthDate: '1968-03-15', gender: '남성 (Male)',
+    institution: '서울대학교병원', doctor: '김영수 (종양내과)',
+    collectionDate: '2026-02-10', reportDate: '2026-02-25',
+    detected: true, score: 0.83, ciLow: 0.77, ciHigh: 0.89,
+    cso1o: '대장 (Colorectal)', cso1p: 72,
+    cso2o: '위 (Gastric)',      cso2p: 16,
+    cso3o: '췌장 (Pancreatic)', cso3p: 8,
+    medianLen:152, slRatio:0.38, entropy:3.82, peak167:0.31,
+    tssCov:0.72, tissueSignal:'대장 (Colorectal)', promoterIdx:2.31,
+    motifDiv:218, cccaFreq:4.8, mds:0.68,
+    scoreSize:0.82, scoreNuc:0.78, scoreMotif:0.91,
+    bloodVol:4.2, cfDNAConc:8.7, seqDepth:5.2, q30:96.3,
+    mappingRate:99.1, gdnaContam:0.1, effReads:420,
+    sigAnalyst:'김지원 (MT)', sigReader:'박성훈 (MD, PhD)', sigApprover:'이정민 (MD)',
+  },
+  neg: {
+    patientId: 'AiMA-2026-00538', patientName: '김 * 희 (Kim **-hee)',
+    birthDate: '1975-07-22', gender: '여성 (Female)',
+    institution: '삼성서울병원', doctor: '이현정 (건강증진센터)',
+    collectionDate: '2026-02-12', reportDate: '2026-02-25',
+    detected: false, score: 0.08, ciLow: 0.03, ciHigh: 0.13,
+    cso1o: '', cso1p: 0, cso2o: '', cso2p: 0, cso3o: '', cso3p: 0,
+    cfDNAConc_neg:7.2, medianLen_neg:167, slRatio_neg:0.19, tssCov_neg:0.38, mds_neg:0.12,
+    bloodVol:4.2, cfDNAConc:7.2, seqDepth:5.2, q30:96.3,
+    mappingRate:99.1, gdnaContam:0.1, effReads:420,
+    sigAnalyst:'김지원 (MT)', sigReader:'박성훈 (MD, PhD)', sigApprover:'이정민 (MD)',
+  }
+};
+
+function loadPreset(type) {
+  const p = PRESETS[type];
+  $('patientId').value   = p.patientId;
+  $('patientName').value = p.patientName;
+  $('birthDate').value   = p.birthDate;
+  $('gender').value      = p.gender;
+  $('institution').value = p.institution;
+  $('doctor').value      = p.doctor;
+  $('collectionDate').value = p.collectionDate;
+  $('reportDate').value  = p.reportDate;
+
+  $('det-yes').checked = !!p.detected;
+  $('det-no').checked  = !p.detected;
+  onDetectedChange();
+
+  const s = p.score;
+  $('scoreSlider').value = s; $('scoreVal').textContent = s.toFixed(2); $('scoreInput').value = s;
+  $('ciLow').value  = p.ciLow;
+  $('ciHigh').value = p.ciHigh;
+
+  if (p.detected) {
+    $('cso1-organ').value = p.cso1o; $('cso1-slider').value = p.cso1p; $('cso1-disp').textContent = p.cso1p+'%'; $('cso1-prob').value = p.cso1p;
+    $('cso2-organ').value = p.cso2o; $('cso2-slider').value = p.cso2p; $('cso2-disp').textContent = p.cso2p+'%'; $('cso2-prob').value = p.cso2p;
+    $('cso3-organ').value = p.cso3o; $('cso3-slider').value = p.cso3p; $('cso3-disp').textContent = p.cso3p+'%'; $('cso3-prob').value = p.cso3p;
+    $('medianLen').value=p.medianLen; $('slRatio').value=p.slRatio; $('entropy').value=p.entropy; $('peak167').value=p.peak167;
+    $('tssCov').value=p.tssCov; $('tissueSignal').value=p.tissueSignal; $('promoterIdx').value=p.promoterIdx;
+    $('motifDiv').value=p.motifDiv; $('cccaFreq').value=p.cccaFreq; $('mds').value=p.mds;
+    $('scoreSize').value=p.scoreSize; $('scoreNuc').value=p.scoreNuc; $('scoreMotif').value=p.scoreMotif;
+    updateComposite();
+  } else {
+    $('cfDNAConc_neg').value=p.cfDNAConc_neg; $('medianLen_neg').value=p.medianLen_neg;
+    $('slRatio_neg').value=p.slRatio_neg;      $('tssCov_neg').value=p.tssCov_neg;
+    $('mds_neg').value=p.mds_neg;
+  }
+
+  $('bloodVol').value=p.bloodVol;       $('cfDNAConc').value=p.cfDNAConc;
+  $('seqDepth').value=p.seqDepth;       $('q30').value=p.q30;
+  $('mappingRate').value=p.mappingRate; $('gdnaContam').value=p.gdnaContam;
+  $('effReads').value=p.effReads;
+  $('sigAnalyst').value=p.sigAnalyst;   $('sigReader').value=p.sigReader;
+  $('sigApprover').value=p.sigApprover;
+}
+
+function resetForm() { $('reportForm').reset(); onDetectedChange(); $('composite-val').textContent='—'; }
+
+/* ── Age calc helper ── */
+function calcAge(dateStr) {
+  if (!dateStr) return 0;
+  const birth = new Date(dateStr);
+  const now   = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+/* ── Submit ── */
+function submitForm() {
+  // Required field check
+  const required = ['patientId','patientName','birthDate','gender','institution','doctor','collectionDate','reportDate'];
+  let valid = true;
+  required.forEach(id => {
+    if (!val(id)) { $(id).style.borderColor = 'var(--red)'; valid = false; }
+    else            { $(id).style.borderColor = ''; }
+  });
+  if (!valid) { alert('필수 항목(*)을 모두 입력해 주세요.'); return; }
+
+  const detected = $('det-yes').checked;
+  const score    = parseFloat($('scoreInput').value) || 0;
+
+  const data = {
+    patientId:   val('patientId'),
+    patientName: val('patientName'),
+    birthDate:   val('birthDate').replace(/-/g, '.'),
+    age:         calcAge(val('birthDate')),
+    gender:      val('gender'),
+    institution: val('institution'),
+    doctor:      val('doctor'),
+    collectionDate: val('collectionDate').replace(/-/g, '.'),
+    reportDate:     val('reportDate').replace(/-/g, '.'),
+    detected,
+    score,
+    ciLow:  parseFloat(val('ciLow'))  || 0,
+    ciHigh: parseFloat(val('ciHigh')) || 0,
+    reportId: `RPT-${val('reportDate').slice(0,4)}-C12-${val('patientId').slice(-5)}-${detected?'D':'N'}`,
+
+    cso: detected ? [
+      { organ: val('cso1-organ'), prob: parseInt($('cso1-prob').value)||0 },
+      { organ: val('cso2-organ'), prob: parseInt($('cso2-prob').value)||0 },
+      { organ: val('cso3-organ'), prob: parseInt($('cso3-prob').value)||0 },
+    ].filter(c => c.organ) : [],
+
+    frag: detected ? {
+      medianLen:    numVal('medianLen'),    slRatio:   numVal('slRatio'),
+      entropy:      numVal('entropy'),      peak167:   numVal('peak167'),
+      tssCov:       numVal('tssCov'),       tissueSignal: val('tissueSignal'),
+      promoterIdx:  numVal('promoterIdx'),  motifDiv:  numVal('motifDiv'),
+      cccaFreq:     numVal('cccaFreq'),     mds:       numVal('mds'),
+      scoreSize:    numVal('scoreSize'),    scoreNuc:  numVal('scoreNuc'),
+      scoreMotif:   numVal('scoreMotif'),
+    } : {
+      cfDNAConc:  numVal('cfDNAConc_neg'), medianLen: numVal('medianLen_neg'),
+      slRatio:    numVal('slRatio_neg'),   tssCov:    numVal('tssCov_neg'),
+      mds:        numVal('mds_neg'),
+    },
+
+    qc: {
+      bloodVol:    numVal('bloodVol'),   cfDNAConc:   numVal('cfDNAConc'),
+      seqDepth:    numVal('seqDepth'),   q30:         numVal('q30'),
+      mappingRate: numVal('mappingRate'),gdnaContam:  numVal('gdnaContam'),
+      effReads:    numVal('effReads'),
+    },
+
+    sigs: {
+      analyst:  val('sigAnalyst')  || '—',
+      reader:   val('sigReader')   || '—',
+      approver: val('sigApprover') || '—',
+    },
+  };
+
+  localStorage.setItem('aima_c12_report', JSON.stringify(data));
+  window.open('report.html', '_blank');
+}
+
+/* Init */
+onDetectedChange();
+</script>
+</body>
+</html>
