@@ -18,7 +18,7 @@
 }
 body {
   font-family: 'Noto Sans KR', 'NanumSquare', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
-  font-size: 9px;
+  font-size: 10px;
   background: #dde1e9;
   color: var(--text);
   line-height: 1.4;
@@ -44,7 +44,7 @@ body {
   display: none; position: fixed; inset: 0; background: #fff;
   z-index: 2000; justify-content: center; align-items: center; flex-direction: column; gap: 16px;
 }
-#no-data h2 { font-size: 22px; color: var(--navy); }
+#no-data h2 { font-size: 24px; color: var(--navy); }
 #no-data p  { font-size: 15px; color: var(--dg); }
 
 /* ── A4 Page ── */
@@ -70,9 +70,9 @@ body {
 }
 .ph-logo { display: flex; align-items: center; gap: 3mm; }
 .ph-logo img { height: 12mm; width: auto; }
-.ph-title h1 { font-size: 11px; font-weight: 800; color: var(--navy); }
-.ph-title p  { font-size: 6px; color: var(--dg); margin-top: .5mm; }
-.ph-page { font-size: 7px; color: var(--dg); white-space: nowrap; }
+.ph-title h1 { font-size: 13px; font-weight: 800; color: var(--navy); }
+.ph-title p  { font-size: 7.5px; color: var(--dg); margin-top: .5mm; }
+.ph-page { font-size: 8.5px; color: var(--dg); white-space: nowrap; }
 
 /* ── Page Footer ── */
 .pf {
@@ -80,8 +80,8 @@ body {
   padding: 2mm 18mm 4mm;
   display: flex; justify-content: space-between; align-items: flex-end;
 }
-.pf-left p { font-size: 5.5px; color: var(--dg); line-height: 1.7; }
-.pf-right  { font-size: 5.5px; font-weight: 700; color: var(--dg); white-space: nowrap; }
+.pf-left p { font-size: 7px; color: var(--dg); line-height: 1.7; }
+.pf-right  { font-size: 7px; font-weight: 700; color: var(--dg); white-space: nowrap; }
 
 /* ── Section Title ── */
 .sec { margin-bottom: 0; flex-shrink: 0; }
@@ -90,16 +90,16 @@ body {
   width: 3px; flex-shrink: 0; border-radius: 2px; margin-right: 4px;
   background: linear-gradient(to bottom, var(--blue), var(--purple));
 }
-.sec-hd h2 { font-size: 11px; font-weight: 800; color: var(--navy); }
-.sec-hd p  { font-size: 6.5px; color: var(--dg); margin-top: 1mm; }
+.sec-hd h2 { font-size: 13px; font-weight: 800; color: var(--navy); }
+.sec-hd p  { font-size: 8px; color: var(--dg); margin-top: 1mm; }
 
 /* ── Info Table ── */
 .info-tbl { width: 100%; border-collapse: collapse; }
 .info-tbl tr:nth-child(odd) td { background: var(--lg); }
-.info-tbl td { padding: 1.8mm 3mm; height: 8mm; font-size: 7px; }
+.info-tbl td { padding: 1.8mm 3mm; height: 8mm; font-size: 8.5px; }
 .info-tbl .lbl { font-weight: 700; color: var(--dg); width: 24%; }
 .info-tbl .val { color: var(--text); width: 26%; }
-.info-meta { font-size: 6.5px; color: var(--dg); margin-top: 1.5mm; padding-left: 3mm; }
+.info-meta { font-size: 8px; color: var(--dg); margin-top: 1.5mm; padding-left: 3mm; }
 
 /* ── Hero ── */
 .hero {
@@ -109,16 +109,16 @@ body {
 }
 .hero-accent { width: 4mm; flex-shrink: 0; border-radius: 2mm 0 0 2mm; }
 .hero-main { flex: 1; padding: 4mm 0 4mm; }
-.hero-main h2 { font-size: 22px; font-weight: 900; margin-bottom: 1.5mm; }
-.hero-main h3 { font-size: 10px; font-weight: 700; margin-bottom: 2.5mm; }
-.hero-main p  { font-size: 8px; line-height: 1.7; }
+.hero-main h2 { font-size: 24px; font-weight: 900; margin-bottom: 1.5mm; }
+.hero-main h3 { font-size: 12px; font-weight: 700; margin-bottom: 2.5mm; }
+.hero-main p  { font-size: 9.5px; line-height: 1.7; }
 .hero-score { min-width: 52mm; flex-shrink: 0; padding: 3mm 4mm 3mm 0; }
-.hero-score .slabel { font-size: 7px; font-weight: 700; margin-bottom: 1mm; }
-.hero-score .sval   { font-size: 24px; font-weight: 900; }
-.hero-score .smax   { font-size: 6.5px; color: var(--dg); margin-left: 1mm; vertical-align: middle; }
+.hero-score .slabel { font-size: 8.5px; font-weight: 700; margin-bottom: 1mm; }
+.hero-score .sval   { font-size: 26px; font-weight: 900; }
+.hero-score .smax   { font-size: 8px; color: var(--dg); margin-left: 1mm; vertical-align: middle; }
 .score-bar-bg { height: 3mm; border-radius: 2mm; margin-top: 2mm; overflow: hidden; }
 .score-bar-fill { height: 100%; border-radius: 2mm; transition: width .4s; }
-.snote { font-size: 6px; color: var(--dg); margin-top: 1.5mm; }
+.snote { font-size: 7.5px; color: var(--dg); margin-top: 1.5mm; }
 
 .hero.det   { background: var(--red-bg); border-color: var(--red-bd); }
 .hero.det .hero-accent  { background: var(--red); }
@@ -149,14 +149,14 @@ body {
 .cso-rank {
   width: 7mm; height: 7mm; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 8px; font-weight: 900; color: #fff; flex-shrink: 0;
+  font-size: 9.5px; font-weight: 900; color: #fff; flex-shrink: 0;
 }
-.cso-name { width: 38mm; font-size: 8px; flex-shrink: 0; }
+.cso-name { width: 38mm; font-size: 9.5px; flex-shrink: 0; }
 .cso-row.r1 .cso-name { font-weight: 700; }
 .cso-bar-wrap { flex: 1; height: 5mm; background: #E5E7EB; border-radius: 2.5mm; overflow: hidden; }
 .cso-bar-fill { height: 100%; border-radius: 2.5mm; }
-.cso-pct { width: 12mm; font-size: 8px; font-weight: 800; text-align: right; flex-shrink: 0; }
-.cso-empty { font-size: 7.5px; color: var(--dg); padding: 3mm 5mm; }
+.cso-pct { width: 12mm; font-size: 9.5px; font-weight: 800; text-align: right; flex-shrink: 0; }
+.cso-empty { font-size: 9px; color: var(--dg); padding: 3mm 5mm; }
 
 /* ── C12 Grid ── */
 .c12-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; }
@@ -166,12 +166,12 @@ body {
   gap: 2.5mm; height: 14mm;
 }
 .c12-dot { width: 4.5mm; height: 4.5mm; border-radius: 50%; flex-shrink: 0; }
-.c12-kr  { font-size: 7.5px; font-weight: 700; }
-.c12-en  { font-size: 5.5px; color: var(--dg); }
+.c12-kr  { font-size: 9px; font-weight: 700; }
+.c12-en  { font-size: 7px; color: var(--dg); }
 
 /* ── Sub-section heading ── */
 .sub-hd {
-  font-size: 7.5px; font-weight: 700; color: var(--navy);
+  font-size: 9px; font-weight: 700; color: var(--navy);
   margin: 3.5mm 0 2mm 3mm; display: flex; align-items: center; gap: 2mm;
 }
 .sub-hd::before { content: '▸'; color: var(--blue); }
@@ -179,9 +179,9 @@ body {
 /* ── Data Table ── */
 .dtbl { width: 100%; border-collapse: collapse; margin-bottom: 2.5mm; }
 .dtbl thead tr { background: linear-gradient(to right, var(--navy), #2D3258); }
-.dtbl thead th { padding: 2.5mm 2mm; font-size: 6.5px; font-weight: 700; color: #fff; text-align: left; }
+.dtbl thead th { padding: 2.5mm 2mm; font-size: 8px; font-weight: 700; color: #fff; text-align: left; }
 .dtbl tbody tr:nth-child(odd) { background: var(--lg); }
-.dtbl tbody td { padding: 2mm 2mm; font-size: 6.5px; height: 7.5mm; }
+.dtbl tbody td { padding: 2mm 2mm; font-size: 8px; height: 7.5mm; }
 .up, .dn  { color: var(--red); font-weight: 700; }
 .ok, .pass { color: var(--grn); font-weight: 700; }
 .dash { color: var(--dg); }
@@ -192,13 +192,13 @@ body {
   padding: 2.5mm 5mm; display: flex; align-items: center;
   justify-content: space-between; margin: 1mm 0 3mm;
 }
-.comp-box .clabel { font-size: 8px; font-weight: 700; color: var(--navy); }
-.comp-box .cval   { font-size: 14px; font-weight: 900; color: var(--red); }
+.comp-box .clabel { font-size: 9.5px; font-weight: 700; color: var(--navy); }
+.comp-box .cval   { font-size: 16px; font-weight: 900; color: var(--red); }
 
 /* ── QC ── */
 .qc-tbl { width: 100%; border-collapse: collapse; }
 .qc-tbl tr:nth-child(odd) { background: var(--lg); }
-.qc-tbl td { padding: 2mm 3mm; font-size: 6.5px; height: 7.5mm; }
+.qc-tbl td { padding: 2mm 3mm; font-size: 8px; height: 7.5mm; }
 .qc-tbl .qname { color: var(--dg); width: 38%; }
 .qc-tbl .qval  { font-weight: 700; width: 20%; }
 .qc-tbl .qref  { color: var(--dg); width: 28%; }
@@ -208,35 +208,35 @@ body {
   background: var(--lg); border-radius: 3mm;
   padding: 5mm 6mm; margin-bottom: 4mm;
 }
-.interp-box h4 { font-size: 7.5px; font-weight: 700; color: var(--navy); margin-bottom: 2.5mm; }
-.interp-box p  { font-size: 7px; line-height: 1.9; }
+.interp-box h4 { font-size: 9px; font-weight: 700; color: var(--navy); margin-bottom: 2.5mm; }
+.interp-box p  { font-size: 8.5px; line-height: 1.9; }
 
 /* ── Recommendation ── */
 .rec-box { border-radius: 3mm; border: 1px solid; padding: 4.5mm 6mm; margin-bottom: 4mm; }
 .rec-box.det { background: var(--amb-bg); border-color: var(--amb-bd); }
 .rec-box.neg { background: var(--grn-bg); border-color: var(--grn-bd); }
-.rec-box h4  { font-size: 8px; font-weight: 700; margin-bottom: 2mm; }
+.rec-box h4  { font-size: 9.5px; font-weight: 700; margin-bottom: 2mm; }
 .rec-box.det h4 { color: var(--amb-dk); }
 .rec-box.neg h4 { color: var(--grn-dk); }
 .rec-box ol  { padding-left: 5mm; }
-.rec-box li  { font-size: 7px; line-height: 2.4; }
+.rec-box li  { font-size: 8.5px; line-height: 2.4; }
 .rec-box.det li { color: var(--amb-dkr); }
 .rec-box.neg li { color: var(--grn-dkr); }
 
 /* ── Limitations ── */
-.lim h4 { font-size: 7px; font-weight: 700; color: var(--navy); margin-bottom: 1.5mm; }
-.lim .lim-desc { font-size: 6.5px; color: var(--dg); margin-bottom: 1.5mm; line-height: 1.6; }
+.lim h4 { font-size: 8.5px; font-weight: 700; color: var(--navy); margin-bottom: 1.5mm; }
+.lim .lim-desc { font-size: 8px; color: var(--dg); margin-bottom: 1.5mm; line-height: 1.6; }
 .lim ul { padding-left: 4mm; }
-.lim li { font-size: 6px; color: var(--dg); line-height: 2.2; list-style: disc; }
+.lim li { font-size: 7.5px; color: var(--dg); line-height: 2.2; list-style: disc; }
 
 /* ── Signatures ── */
 .sig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7mm; margin-top: 5mm; }
-.sig-block p   { font-size: 6px; color: var(--dg); margin-bottom: 1mm; }
-.sig-block h5  { font-size: 7px; font-weight: 700; margin-bottom: 3mm; }
+.sig-block p   { font-size: 7.5px; color: var(--dg); margin-bottom: 1mm; }
+.sig-block h5  { font-size: 8.5px; font-weight: 700; margin-bottom: 3mm; }
 .sig-line      { border-top: 1px dashed var(--dg); }
 
 /* ── Report Meta ── */
-.rmeta { font-size: 5.5px; color: var(--dg); margin-top: 5mm; line-height: 2.2; }
+.rmeta { font-size: 7px; color: var(--dg); margin-top: 5mm; line-height: 2.2; }
 
 /* ─────────── PRINT ─────────── */
 @media print {
@@ -431,10 +431,10 @@ body {
       </div>
       <table class="qc-tbl" id="qc-tbl">
         <thead><tr style="background:linear-gradient(to right,var(--navy),#2D3258)">
-          <th style="padding:1.8mm 3mm;font-size:6.5px;font-weight:700;color:#fff;width:38%">지표</th>
-          <th style="padding:1.8mm 3mm;font-size:6.5px;font-weight:700;color:#fff;width:20%">측정값</th>
-          <th style="padding:1.8mm 3mm;font-size:6.5px;font-weight:700;color:#fff;width:28%">참조 범위</th>
-          <th style="padding:1.8mm 3mm;font-size:6.5px;font-weight:700;color:#fff;width:14%">판정</th>
+          <th style="padding:1.8mm 3mm;font-size:8px;font-weight:700;color:#fff;width:38%">지표</th>
+          <th style="padding:1.8mm 3mm;font-size:8px;font-weight:700;color:#fff;width:20%">측정값</th>
+          <th style="padding:1.8mm 3mm;font-size:8px;font-weight:700;color:#fff;width:28%">참조 범위</th>
+          <th style="padding:1.8mm 3mm;font-size:8px;font-weight:700;color:#fff;width:14%">판정</th>
         </tr></thead>
         <tbody id="qc-body"></tbody>
       </table>
@@ -598,25 +598,25 @@ function renderCSO(cso, detected) {
   if (!detected) {
     wrap.innerHTML = `
       <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:3mm;padding:4mm 5mm;">
-        <div style="font-size:8.5px;font-weight:800;color:#065F46;margin-bottom:2.5mm;">
+        <div style="font-size:10px;font-weight:800;color:#065F46;margin-bottom:2.5mm;">
           ✓ 암 신호 미감지 — CSO 분석 해당 없음
         </div>
-        <p style="font-size:7px;color:#064E3B;line-height:1.85;margin-bottom:3.5mm;">
+        <p style="font-size:8.5px;color:#064E3B;line-height:1.85;margin-bottom:3.5mm;">
           암 신호가 감지되지 않아 기원 장기 분석(CSO)을 수행하지 않습니다.
           CSO 분석은 암 신호 스코어 ≥ 0.50인 경우에만 최대 3개 기원 장기를 예측하여 보고합니다.
         </p>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2.5mm;">
           <div style="background:#fff;border-radius:2mm;padding:3mm 3.5mm;border:.8px solid #BBF7D0;">
-            <div style="font-size:7px;font-weight:700;color:#065F46;margin-bottom:1.5mm;">분석 원리</div>
-            <div style="font-size:6.5px;color:#047857;line-height:1.75;">cfDNA 단편화 패턴을 12개 장기 기준 프로파일과 비교하여 기원 장기를 확률로 예측합니다.</div>
+            <div style="font-size:8.5px;font-weight:700;color:#065F46;margin-bottom:1.5mm;">분석 원리</div>
+            <div style="font-size:8px;color:#047857;line-height:1.75;">cfDNA 단편화 패턴을 12개 장기 기준 프로파일과 비교하여 기원 장기를 확률로 예측합니다.</div>
           </div>
           <div style="background:#fff;border-radius:2mm;padding:3mm 3.5mm;border:.8px solid #BBF7D0;">
-            <div style="font-size:7px;font-weight:700;color:#065F46;margin-bottom:1.5mm;">보고 기준</div>
-            <div style="font-size:6.5px;color:#047857;line-height:1.75;">암 신호 스코어가 임계값(0.50) 미만인 경우 CSO 분석 결과는 임상적 의미가 없어 보고하지 않습니다.</div>
+            <div style="font-size:8.5px;font-weight:700;color:#065F46;margin-bottom:1.5mm;">보고 기준</div>
+            <div style="font-size:8px;color:#047857;line-height:1.75;">암 신호 스코어가 임계값(0.50) 미만인 경우 CSO 분석 결과는 임상적 의미가 없어 보고하지 않습니다.</div>
           </div>
           <div style="background:#fff;border-radius:2mm;padding:3mm 3.5mm;border:.8px solid #BBF7D0;">
-            <div style="font-size:7px;font-weight:700;color:#065F46;margin-bottom:1.5mm;">CSO 정확도</div>
-            <div style="font-size:6.5px;color:#047857;line-height:1.75;">Top-1 정확도 89.7%, Top-3 정확도 97.2% (검증 연구 기반, n=120,000)</div>
+            <div style="font-size:8.5px;font-weight:700;color:#065F46;margin-bottom:1.5mm;">CSO 정확도</div>
+            <div style="font-size:8px;color:#047857;line-height:1.75;">Top-1 정확도 89.7%, Top-3 정확도 97.2% (검증 연구 기반, n=120,000)</div>
           </div>
         </div>
       </div>`;
@@ -700,26 +700,26 @@ function renderFragNeg(frag, score) {
   const ths = ['지표','측정값','참조 범위','판정'].map(h=>`<th>${h}</th>`).join('');
   const trs = rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="${r[3]}">${r[4]}</td></tr>`).join('');
   wrap.innerHTML = `
-    <p style="font-size:7.5px;color:var(--dg);padding:0 0 2.5mm 5mm">
+    <p style="font-size:9px;color:var(--dg);padding:0 0 2.5mm 5mm">
       암 신호가 감지되지 않아 상세 피처 분석 결과를 별도 표기하지 않습니다. 주요 단편화 지표는 모두 정상 범위 내입니다.</p>
     <p class="sub-hd">cfDNA 단편화 기본 프로파일</p>
     <table class="dtbl"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>
     <p class="sub-hd" style="margin-top:4mm;">Fragmentomics 분석 방법론</p>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2.5mm;">
       <div style="background:#EFF6FF;border-radius:3mm;padding:4mm 4.5mm;border:.8px solid #BFDBFE;">
-        <div style="font-size:8px;font-weight:800;color:#1E40AF;margin-bottom:2mm;">① Fragment Size Profile</div>
-        <div style="font-size:6.5px;font-weight:700;color:#1E3A8A;margin-bottom:1.5mm;">단편 길이 분포 분석</div>
-        <div style="font-size:6px;color:#1D4ED8;line-height:1.8;">암세포 유래 cfDNA는 뉴클레오솜 재배치로 인해 정상 세포보다 짧은 단편 길이(< 160bp)를 보입니다. 단편 길이 비율(Short/Long), 길이 엔트로피, 167bp 피크 비율을 복합 분석하여 암 신호를 감지합니다.</div>
+        <div style="font-size:9.5px;font-weight:800;color:#1E40AF;margin-bottom:2mm;">① Fragment Size Profile</div>
+        <div style="font-size:8px;font-weight:700;color:#1E3A8A;margin-bottom:1.5mm;">단편 길이 분포 분석</div>
+        <div style="font-size:7.5px;color:#1D4ED8;line-height:1.8;">암세포 유래 cfDNA는 뉴클레오솜 재배치로 인해 정상 세포보다 짧은 단편 길이(< 160bp)를 보입니다. 단편 길이 비율(Short/Long), 길이 엔트로피, 167bp 피크 비율을 복합 분석하여 암 신호를 감지합니다.</div>
       </div>
       <div style="background:#F5F3FF;border-radius:3mm;padding:4mm 4.5mm;border:.8px solid #DDD6FE;">
-        <div style="font-size:8px;font-weight:800;color:#5B21B6;margin-bottom:2mm;">② Nucleosome Footprint</div>
-        <div style="font-size:6.5px;font-weight:700;color:#4C1D95;margin-bottom:1.5mm;">뉴클레오솜 위치 신호 분석</div>
-        <div style="font-size:6px;color:#6D28D9;line-height:1.8;">뉴클레오솜이 보호하는 DNA 구간은 뉴클레아제로부터 보존되어 cfDNA 단편 끝점의 위치 분포에 패턴을 남깁니다. 전사 시작점(TSS) 주변 커버리지와 프로모터 접근성 지수가 암세포 특이적 신호를 반영합니다.</div>
+        <div style="font-size:9.5px;font-weight:800;color:#5B21B6;margin-bottom:2mm;">② Nucleosome Footprint</div>
+        <div style="font-size:8px;font-weight:700;color:#4C1D95;margin-bottom:1.5mm;">뉴클레오솜 위치 신호 분석</div>
+        <div style="font-size:7.5px;color:#6D28D9;line-height:1.8;">뉴클레오솜이 보호하는 DNA 구간은 뉴클레아제로부터 보존되어 cfDNA 단편 끝점의 위치 분포에 패턴을 남깁니다. 전사 시작점(TSS) 주변 커버리지와 프로모터 접근성 지수가 암세포 특이적 신호를 반영합니다.</div>
       </div>
       <div style="background:#FFF7ED;border-radius:3mm;padding:4mm 4.5mm;border:.8px solid #FED7AA;">
-        <div style="font-size:8px;font-weight:800;color:#92400E;margin-bottom:2mm;">③ End Motif Pattern</div>
-        <div style="font-size:6.5px;font-weight:700;color:#78350F;margin-bottom:1.5mm;">말단 서열 모티프 분석</div>
-        <div style="font-size:6px;color:#B45309;line-height:1.8;">cfDNA 단편 양 끝 4-mer 서열 256가지의 빈도 분포를 분석합니다. 암 환자에서는 특정 모티프(CCCA 등)의 비정상적 증가와 전체 모티프 다양성 감소가 관찰되며, 이를 모티프 불균형 스코어(MDS)로 정량화합니다.</div>
+        <div style="font-size:9.5px;font-weight:800;color:#92400E;margin-bottom:2mm;">③ End Motif Pattern</div>
+        <div style="font-size:8px;font-weight:700;color:#78350F;margin-bottom:1.5mm;">말단 서열 모티프 분석</div>
+        <div style="font-size:7.5px;color:#B45309;line-height:1.8;">cfDNA 단편 양 끝 4-mer 서열 256가지의 빈도 분포를 분석합니다. 암 환자에서는 특정 모티프(CCCA 등)의 비정상적 증가와 전체 모티프 다양성 감소가 관찰되며, 이를 모티프 불균형 스코어(MDS)로 정량화합니다.</div>
       </div>
     </div>`;
 }
